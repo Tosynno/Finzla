@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Finzla.Api/Finzla.Api.csproj" />
+    <Project Path="Finzla.Application/Finzla.Application.csproj" />
+    <Project Path="Finzla.Domain/Finzla.Domain.csproj" />
+    <Project Path="Finzla.Infrastructure/Finzla.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="../Finzla.Tests/Finzla.Tests.csproj" />
+</Solution>
