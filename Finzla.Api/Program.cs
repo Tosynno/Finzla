@@ -1,4 +1,5 @@
 using Finzla.Api;
+using Finzla.Api.Filters;
 using Finzla.Api.Middleware;
 using Finzla.Api.MIddleware;
 using Finzla.Application;
@@ -53,7 +54,12 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+builder.Services.AddScoped<FluentValidationFilter>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FluentValidationFilter>();
+});
 
 
 builder.Services.AddEndpointsApiExplorer();

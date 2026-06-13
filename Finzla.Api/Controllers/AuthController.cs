@@ -18,9 +18,9 @@ namespace Finzla.Api.Controllers
             [FromHeader(Name = "AppSecurityKey")] string? appSecurityKey,
             CancellationToken cancellationToken)
         {
-            var ip     = HttpContext.Connection.RemoteIpAddress?.ToString();
+            //var ip     = HttpContext.Connection.RemoteIpAddress?.ToString();
             var result = await authService.LoginAsync(
-                request, appSecurityKey ?? string.Empty, ip, cancellationToken);
+                request, appSecurityKey ?? string.Empty, cancellationToken);
 
             if (result.IsFailure)
             {

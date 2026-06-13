@@ -15,7 +15,7 @@ namespace Finzla.Domain.Entities
         public TransactionType Type { get; private set; }
         public DateTime OccurredAt { get; private set; }
         public DateTime ReceivedAt { get; private set; }
-        public string TraceId { get; set; }
+        public string TraceId { get; set; } = default!;
 
         public static Result<Transaction> Create(
             string TraceId,
@@ -28,8 +28,8 @@ namespace Finzla.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(TraceId))
                 return Result<Transaction>.Failure(DomainError.Transaction.MissingTraceId);
-            if (string.IsNullOrWhiteSpace(externalId))
-                return Result<Transaction>.Failure(DomainError.Transaction.MissingExternalId);
+            //if (string.IsNullOrWhiteSpace(externalId))
+            //    return Result<Transaction>.Failure(DomainError.Transaction.MissingExternalId);
 
             if (amount <= 0)
                 return Result<Transaction>.Failure(DomainError.Transaction.InvalidAmount);
@@ -40,6 +40,7 @@ namespace Finzla.Domain.Entities
             return Result<Transaction>.Success(new Transaction
             {
                 Id = Guid.NewGuid(),
+                TraceId = TraceId.Trim(),
                 ExternalId = externalId.Trim(),
                 AccountId = accountId.Trim(),
                 Currency = currency.Trim().ToUpperInvariant(),

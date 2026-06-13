@@ -2,6 +2,7 @@ using Finzla.Application.Contracts.Services;
 using Finzla.Application.Dtos;
 using Finzla.Domain.Entities;
 using Finzla.Domain.Errors;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Finzla.Application.Features
@@ -9,15 +10,19 @@ namespace Finzla.Application.Features
     public sealed class IngestTransactionService(
         ITransactionRepository transactionRepo,
         IAccountSummaryRepository summaryRepo,
+        IConfiguration configuration,
         ILogger<IngestTransactionService> logger)
     {
+        private readonly string _defaultGLAccount = configuration["Auth:GLAccount"] ?? "2098509840";
         public async Task<Result<IngestTransactionResponse>> ExecuteAsync(
             IngestTransactionRequest request,
             CancellationToken cancellationToken = default)
         {
+
             if (await transactionRepo.ExistsAsync(request.TraceId, cancellationToken))
             {
-                logger.LogInformation("Duplicate transaction received: {ExternalId}", request.ExternalId);
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Duplicate transaction received: {ExternalId}", request.DebitAccount);
 
                 var existingSummary = await summaryRepo.FindAsync(request.AccountId, cancellationToken)
                                       ?? AccountSummary.Init(request.AccountId);
@@ -26,13 +31,36 @@ namespace Finzla.Application.Features
                     ToResponse(request.TraceId, "Duplicate", existingSummary));
             }
 
+            string debitAccount = request.DebitAccount ?? string.Empty;
+            string accountId = request.AccountId;
+
+            if (request.IsOtherBank)
+            {
+                switch (request.Type?.ToUpperInvariant())
+                {
+                    case "CREDIT":
+                        // Other Bank Credit → GLAccount becomes the debit leg reference
+                        debitAccount = _defaultGLAccount;
+                        break;
+
+                    case "DEBIT":
+                        // Other Bank Debit → GLAccount is used as the target (Finzla side)
+                        accountId = _defaultGLAccount;
+                        break;
+
+                    default:
+                        // Fallback - use original values
+                        break;
+                }
+            }
+
             var txResult = Transaction.Create(
                 request.TraceId,
-                request.ExternalId,
-                request.AccountId,
+                debitAccount,
+                accountId,
                 request.Currency,
                 request.Amount,
-                request.Type,
+                request.Type!,
                 request.OccurredAt);
 
             if (txResult.IsFailure)
@@ -53,8 +81,8 @@ namespace Finzla.Application.Features
                 await summaryRepo.AddAsync(summary, cancellationToken);
             else
                 await summaryRepo.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation(
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation(
                 "Transaction {ExternalId} accepted. Account {AccountId} balance: {Balance}",
                 transaction.ExternalId, transaction.AccountId, summary.Balance);
 
