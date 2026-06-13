@@ -18,14 +18,17 @@ namespace Finzla.Infrastructure.Persistence.Configurations
 
             builder.Property(t => t.ExternalId)
                    .IsRequired()
-                   .HasMaxLength(256);
+                   .HasMaxLength(10);
 
             builder.HasIndex(t => t.ExternalId)
-                   .IsUnique()
                    .HasDatabaseName("IX_Transactions_ExternalId");
 
             builder.HasIndex(t => t.AccountId)
                    .HasDatabaseName("IX_Transactions_AccountId");
+
+            builder.HasIndex(t => t.TraceId)
+                   .IsUnique()
+                   .HasDatabaseName("IX_Transactions_TraceId");
 
             builder.Property(t => t.AccountId)
                    .IsRequired()
@@ -46,6 +49,7 @@ namespace Finzla.Infrastructure.Persistence.Configurations
 
             builder.Property(t => t.OccurredAt).IsRequired();
             builder.Property(t => t.ReceivedAt).IsRequired();
+            builder.Property(t => t.TraceId).IsRequired();
         }
     }
 

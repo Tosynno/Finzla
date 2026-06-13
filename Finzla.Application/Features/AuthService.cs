@@ -19,7 +19,6 @@ namespace Finzla.Application.Features
         public async Task<Result<LoginResponse>> LoginAsync(
             LoginRequest request,
             string appSecurityKey,
-            string? ipAddress,
             CancellationToken ct = default)
         {
             

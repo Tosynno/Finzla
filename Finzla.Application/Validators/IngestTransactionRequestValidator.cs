@@ -9,9 +9,27 @@ namespace Finzla.Application.Validators
 
         public IngestTransactionRequestValidator()
         {
-            RuleFor(x => x.ExternalId)
-                .NotEmpty().WithMessage("ExternalId is required.")
-                .MaximumLength(256).WithMessage("ExternalId must not exceed 256 characters.");
+            RuleFor(x => x.TraceId)
+                .NotEmpty().WithMessage("TraceId is required.")
+                .MaximumLength(50).WithMessage("TraceId must not exceed 50 characters.");
+
+            //When(x => x.IsOtherBank == true, () =>
+            //{
+            //    RuleFor(x => x.GLAccount)
+            //        .NotEmpty().WithMessage("GLAccount is required for other bank transactions.")
+            //        .MaximumLength(25).WithMessage("GLAccount must not exceed 25 characters.")
+            //        .Matches(@"^\d{1,25}$").WithMessage("GLAccount must be numeric and up to 25 digits.");
+
+            //    RuleFor(x => x.DebitAccount)
+            //        .Empty().WithMessage("DebitAccount should not be provided when IsOtherBank is true.");
+            //});
+
+            When(x => x.IsOtherBank != true, () =>
+            {
+                RuleFor(x => x.DebitAccount)
+                    .NotEmpty().WithMessage("DebitAccount is required for Finzla to Finzla account transactions.")
+                    .MaximumLength(128).WithMessage("DebitAccount must not exceed 128 characters.");
+            });
 
             RuleFor(x => x.AccountId)
                 .NotEmpty().WithMessage("AccountId is required.")

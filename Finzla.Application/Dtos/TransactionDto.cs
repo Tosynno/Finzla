@@ -6,16 +6,17 @@ namespace Finzla.Application.Dtos
 {
     public sealed record IngestTransactionRequest(
      string TraceId,
-     string ExternalId,
+     string DebitAccount,
      string AccountId,
      string Currency,
      decimal Amount,
      string Type,           
-     DateTime OccurredAt
+     DateTime OccurredAt,
+     bool IsOtherBank = false
  );
 
     public sealed record IngestTransactionResponse(
-        string ExternalId,
+        string DebitAccount,
         string Status,         
         AccountSummaryDto AccountSummary
     );
