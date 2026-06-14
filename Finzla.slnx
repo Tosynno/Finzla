@@ -5,5 +5,5 @@
     <Project Path="Finzla.Domain/Finzla.Domain.csproj" />
     <Project Path="Finzla.Infrastructure/Finzla.Infrastructure.csproj" />
   </Folder>
-  <Project Path="../Finzla.Tests/Finzla.Tests.csproj" />
+  <Project Path="Finzla.Tests/Finzla.Tests.csproj" />
 </Solution>
