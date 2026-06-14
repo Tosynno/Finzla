@@ -22,6 +22,7 @@ namespace Finzla.Infrastructure
             services.AddScoped<IAccountSummaryRepository, AccountSummaryRepository>();
             services.AddScoped<IUserRepository,           UserRepository>();
             services.AddScoped<IAuditLogRepository,       AuditLogRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Services
             services.AddSingleton<IWebhookSignatureValidator, HmacWebhookSignatureValidator>();

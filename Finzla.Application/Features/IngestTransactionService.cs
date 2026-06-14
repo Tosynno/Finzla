@@ -10,6 +10,7 @@ namespace Finzla.Application.Features
     public sealed class IngestTransactionService(
         ITransactionRepository transactionRepo,
         IAccountSummaryRepository summaryRepo,
+        IUnitOfWork unitOfWork,
         IConfiguration configuration,
         ILogger<IngestTransactionService> logger)
     {
@@ -75,12 +76,25 @@ namespace Finzla.Application.Features
             summary ??= AccountSummary.Init(request.AccountId);
             summary.Apply(transaction);
 
-            await transactionRepo.AddAsync(transaction, cancellationToken);
 
-            if (isNew)
-                await summaryRepo.AddAsync(summary, cancellationToken);
-            else
-                await summaryRepo.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await unitOfWork.BeginTransactionAsync(cancellationToken);
+
+                await transactionRepo.AddAsync(transaction, cancellationToken);
+
+                if (isNew)
+                    await summaryRepo.AddAsync(summary, cancellationToken);
+                else
+                    await summaryRepo.SaveChangesAsync(cancellationToken);
+
+                await unitOfWork.CommitTransactionAsync(cancellationToken);
+            }
+            catch
+            {
+                await unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw;
+            }
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation(
                 "Transaction {ExternalId} accepted. Account {AccountId} balance: {Balance}",
